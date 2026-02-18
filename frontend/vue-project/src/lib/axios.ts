@@ -4,6 +4,9 @@ const axiosInstance = axios.create({
     baseURL: 'http://localhost:8000/api',
     withCredentials: true,
     withXSRFToken: true,
+    headers: {
+        'Accept': 'application/json',
+    },
 })
 
 export default axiosInstance;

@@ -1,21 +1,28 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { reactive } from 'vue'
 import axiosInstance from '@/lib/axios'
 
-const name = ref('')
-const email = ref('')
-const password = ref('')
-const password_confirmation = ref('')
+interface RegisterForm {
+    name: string;
+    email: string;
+    password: string;
+    password_confirmation: string;
+}
 
-const register = async () => {
+const form = reactive<RegisterForm>({
+    name: '',
+    email: '',
+    password: '',
+    password_confirmation: '',
+})
+
+const register = async (payload: RegisterForm) => {
     try {
-        await axiosInstance.get('/sanctum/csrf-cookie')
-        const response = await axiosInstance.post('/register', {
-            name: name.value,
-            email: email.value,
-            password: password.value,
-            password_confirmation: password_confirmation.value,
-        })
+        await axiosInstance.get('/sanctum/csrf-cookie', {
+            baseURL: 'http://localhost:8000',
+        });
+        console.log('CSRF cookie set');
+        const response = await axiosInstance.post('/register', payload)
         console.log(response.data)
     } catch (error) {
         console.error(error)
@@ -30,11 +37,11 @@ const register = async () => {
         </div>
         <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
             <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-                <form @submit.prevent="register" class="space-y-6">
+                <form @submit.prevent="register(form)" class="space-y-6">
                     <div>
                         <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
                         <div class="mt-1">
-                            <input v-model="name" type="text" id="name" required
+                            <input v-model="form.name" type="text" id="name" required
                                 class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-brand focus:border-brand sm:text-sm"
                                 placeholder="Full Name" />
                         </div>
@@ -42,7 +49,7 @@ const register = async () => {
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
                         <div class="mt-1">
-                            <input v-model="email" type="email" id="email" required
+                            <input v-model="form.email" type="email" id="email" required
                                 class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-brand focus:border-brand sm:text-sm"
                                 placeholder="email@example.com" />
                         </div>
@@ -50,7 +57,7 @@ const register = async () => {
                     <div>
                         <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
                         <div class="mt-1">
-                            <input v-model="password" type="password" id="password" required
+                            <input v-model="form.password" type="password" id="password" required
                                 class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-brand focus:border-brand sm:text-sm"
                                 placeholder="••••••••" />
                         </div>
@@ -59,7 +66,8 @@ const register = async () => {
                         <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Confirm
                             Password</label>
                         <div class="mt-1">
-                            <input v-model="password_confirmation" type="password" id="password_confirmation" required
+                            <input v-model="form.password_confirmation" type="password" id="password_confirmation"
+                                required
                                 class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-brand focus:border-brand sm:text-sm"
                                 placeholder="••••••••" />
                         </div>
