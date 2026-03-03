@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
 import axiosInstance from '@/lib/axios'
+import { AxiosError } from 'axios'
 
 interface LoginForm {
     email: string;
@@ -12,6 +13,11 @@ const form = reactive<LoginForm>({
     password: '',
 })
 
+const errors = reactive({
+    email: [],
+    password: [],
+})
+
 const login = async (payload: LoginForm) => {
     try {
         await axiosInstance.get('/sanctum/csrf-cookie', {
@@ -21,6 +27,10 @@ const login = async (payload: LoginForm) => {
         const response = await axiosInstance.post('/login', payload)
         console.log(response.data)
     } catch (error) {
+        if (error instanceof AxiosError && error.response?.status === 422) {
+            errors.email = error.response.data.errors.email
+            errors.password = error.response.data.errors.password
+        }
         console.error(error)
     }
 }
@@ -40,6 +50,11 @@ const login = async (payload: LoginForm) => {
                             <input v-model="form.email" type="email" id="email" required
                                 class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-brand focus:border-brand sm:text-sm"
                                 placeholder="email@example.com" />
+                            <template v-if="errors.email?.length > 0">
+                                <span v-for="error in errors.email" :key="error" class="text-red-500 text-sm">
+                                    {{ error }}
+                                </span>
+                            </template>
                         </div>
                     </div>
                     <div>
@@ -48,6 +63,11 @@ const login = async (payload: LoginForm) => {
                             <input v-model="form.password" type="password" id="password" required
                                 class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-brand focus:border-brand sm:text-sm"
                                 placeholder="••••••••" />
+                            <template v-if="errors.password?.length > 0">
+                                <span v-for="error in errors.password" :key="error" class="text-red-500 text-sm">
+                                    {{ error }}
+                                </span>
+                            </template>
                         </div>
                     </div>
                     <div>

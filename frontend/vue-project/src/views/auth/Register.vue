@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
 import axiosInstance from '@/lib/axios'
+import { AxiosError } from 'axios';
 
 interface RegisterForm {
     name: string;
@@ -16,6 +17,13 @@ const form = reactive<RegisterForm>({
     password_confirmation: '',
 })
 
+const errors = reactive({
+    name: [],
+    email: [],
+    password: [],
+    password_confirmation: [],
+})
+
 const register = async (payload: RegisterForm) => {
     try {
         await axiosInstance.get('/sanctum/csrf-cookie', {
@@ -25,6 +33,12 @@ const register = async (payload: RegisterForm) => {
         const response = await axiosInstance.post('/register', payload)
         console.log(response.data)
     } catch (error) {
+        if (error instanceof AxiosError && error.response?.status === 422) {
+            errors.name = error.response.data.errors.name
+            errors.email = error.response.data.errors.email
+            errors.password = error.response.data.errors.password
+            errors.password_confirmation = error.response.data.errors.password_confirmation
+        }
         console.error(error)
     }
 }
@@ -44,6 +58,11 @@ const register = async (payload: RegisterForm) => {
                             <input v-model="form.name" type="text" id="name" required
                                 class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-brand focus:border-brand sm:text-sm"
                                 placeholder="Full Name" />
+                            <template v-if="errors.name?.length > 0">
+                                <span v-for="error in errors.name" :key="error" class="text-red-500 text-sm">
+                                    {{ error }}
+                                </span>
+                            </template>
                         </div>
                     </div>
                     <div>
@@ -52,6 +71,11 @@ const register = async (payload: RegisterForm) => {
                             <input v-model="form.email" type="email" id="email" required
                                 class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-brand focus:border-brand sm:text-sm"
                                 placeholder="email@example.com" />
+                            <template v-if="errors.email?.length > 0">
+                                <span v-for="error in errors.email" :key="error" class="text-red-500 text-sm">
+                                    {{ error }}
+                                </span>
+                            </template>
                         </div>
                     </div>
                     <div>
@@ -60,6 +84,11 @@ const register = async (payload: RegisterForm) => {
                             <input v-model="form.password" type="password" id="password" required
                                 class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-brand focus:border-brand sm:text-sm"
                                 placeholder="••••••••" />
+                            <template v-if="errors.password?.length > 0">
+                                <span v-for="error in errors.password" :key="error" class="text-red-500 text-sm">
+                                    {{ error }}
+                                </span>
+                            </template>
                         </div>
                     </div>
                     <div>
@@ -70,6 +99,12 @@ const register = async (payload: RegisterForm) => {
                                 required
                                 class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-brand focus:border-brand sm:text-sm"
                                 placeholder="••••••••" />
+                            <template v-if="errors.password_confirmation?.length > 0">
+                                <span v-for="error in errors.password_confirmation" :key="error"
+                                    class="text-red-500 text-sm">
+                                    {{ error }}
+                                </span>
+                            </template>
                         </div>
                     </div>
                     <div>
