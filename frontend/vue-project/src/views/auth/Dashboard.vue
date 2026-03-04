@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import axiosInstance from '@/lib/axios'
 import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router'
+import type { User } from '@/types';
 
-const user = ref({
-    name: '',
-    email: '',
-});
+const router = useRouter()
+
+const user = ref<User | null>(null)
 
 const getUser = async () => {
     try {
@@ -20,6 +21,8 @@ const logout = async () => {
     try {
         await axiosInstance.post('/logout')
         console.log('User logged out')
+        user.value = null
+        router.push({ name: 'login' })
     } catch (error) {
         console.error(error)
     }

@@ -2,11 +2,10 @@
 import axiosInstance from '@/lib/axios'
 import { AxiosError } from 'axios'
 import type { FormKitNode } from '@formkit/core';
+import type { LoginForm, User } from '@/types';
+import { useRouter } from 'vue-router'
 
-interface LoginForm {
-    email: string;
-    password: string;
-}
+const router = useRouter()
 
 const login = async (payload: LoginForm, node?: FormKitNode) => {
     try {
@@ -16,6 +15,7 @@ const login = async (payload: LoginForm, node?: FormKitNode) => {
         console.log('CSRF cookie set');
         const response = await axiosInstance.post('/login', payload)
         console.log(response.data)
+        router.push({ name: 'dashboard' })
     } catch (error) {
         if (error instanceof AxiosError && error.response?.status === 422) {
             node?.setErrors(error.response.data.errors)

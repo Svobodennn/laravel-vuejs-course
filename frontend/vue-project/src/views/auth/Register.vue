@@ -3,13 +3,10 @@ import { reactive } from 'vue'
 import axiosInstance from '@/lib/axios'
 import { AxiosError } from 'axios';
 import type { FormKitNode } from '@formkit/core';
+import type { RegisterForm } from '@/types';
+import { useRouter } from 'vue-router'
 
-interface RegisterForm {
-    name: string;
-    email: string;
-    password: string;
-    password_confirmation: string;
-}
+const router = useRouter()
 
 const form = reactive<RegisterForm>({
     name: '',
@@ -27,6 +24,7 @@ const register = async (payload: RegisterForm, node?: FormKitNode) => {
         console.log('CSRF cookie set');
         const response = await axiosInstance.post('/register', payload)
         console.log(response.data)
+        router.push({ name: 'login' })
     } catch (error) {
         if (error instanceof AxiosError && error.response?.status === 422) {
             node?.setErrors(error.response.data.errors)
