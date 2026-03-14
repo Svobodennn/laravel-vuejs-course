@@ -1,28 +1,8 @@
 <script setup lang="ts">
-import axiosInstance from '@/lib/axios'
-import { AxiosError } from 'axios'
-import type { FormKitNode } from '@formkit/core';
-import type { LoginForm, User } from '@/types';
-import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/store/auth';
 
-const router = useRouter()
+const authStore = useAuthStore()
 
-const login = async (payload: LoginForm, node?: FormKitNode) => {
-    try {
-        await axiosInstance.get('/sanctum/csrf-cookie', {
-            baseURL: 'http://localhost:8000',
-        });
-        console.log('CSRF cookie set');
-        const response = await axiosInstance.post('/login', payload)
-        console.log(response.data)
-        router.push({ name: 'dashboard' })
-    } catch (error) {
-        if (error instanceof AxiosError && error.response?.status === 422) {
-            node?.setErrors(error.response.data.errors)
-        }
-        console.error(error)
-    }
-}
 </script>
 
 <template>
@@ -32,7 +12,7 @@ const login = async (payload: LoginForm, node?: FormKitNode) => {
         </div>
         <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
             <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-                <FormKit type="form" submit-label="Login" @submit="login">
+                <FormKit type="form" submit-label="Login" @submit="authStore.login">
                     <FormKit type="email" label="Email" name="email" />
                     <FormKit type="password" label="Password" name="password" />
                 </FormKit>
